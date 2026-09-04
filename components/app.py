@@ -123,7 +123,7 @@ def App():
         set_editing_id(task_id)
         set_form_open(True)
 
-    def handle_save(t_title, t_priority, t_category, t_note):
+    def handle_save(t_title, t_priority, t_category, t_note, t_labels):
         try:
             if editing_id is not None:
                 update_task(
@@ -132,10 +132,11 @@ def App():
                     priority=t_priority,
                     category=t_category,
                     note=t_note,
+                    labels=t_labels,
                 )
                 show_toast("任务已更新", icon=ft.Icons.CHECK_CIRCLE_OUTLINE)
             else:
-                create_task(t_title, t_priority, t_category, t_note)
+                create_task(t_title, t_priority, t_category, t_note, t_labels)
                 show_toast("任务已创建", icon=ft.Icons.CHECK_CIRCLE_OUTLINE)
         except Exception:
             show_toast("保存失败，请重试", icon=ft.Icons.ERROR_OUTLINE)

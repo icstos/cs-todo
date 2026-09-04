@@ -112,6 +112,34 @@ def TaskItem(task, on_toggle, on_edit, on_delete):
                 border_radius=4,
                 bgcolor=ft.Colors.with_opacity(0.08, category_color),
             ),
+            *(
+                [
+                    ft.Wrap(
+                        controls=[
+                            ft.Container(
+                                content=ft.Text(
+                                    label,
+                                    size=10,
+                                    color=TEXT_SECONDARY,
+                                    weight=ft.FontWeight.W_500,
+                                ),
+                                padding=ft.Padding.symmetric(vertical=2, horizontal=6),
+                                border_radius=999,
+                                bgcolor=ft.Colors.with_opacity(0.06, TEXT_SECONDARY),
+                            )
+                            for label in [
+                                item.strip()
+                                for item in task.labels.split(",")
+                                if item.strip()
+                            ]
+                        ],
+                        spacing=6,
+                        run_spacing=6,
+                    )
+                ]
+                if getattr(task, "labels", "").strip()
+                else []
+            ),
             ft.IconButton(
                 icon=ft.Icons.EDIT_OUTLINED,
                 icon_color=TEXT_SECONDARY,

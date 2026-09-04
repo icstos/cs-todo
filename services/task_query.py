@@ -16,6 +16,7 @@ def _matches_search(task: Task, query: str) -> bool:
         [
             task.title,
             task.note,
+            getattr(task, "labels", ""),
             _CATEGORY_LABEL.get(task.category, ""),
             _PRIORITY_LABEL.get(task.priority, ""),
             _PRIORITY_SHORT.get(task.priority, ""),

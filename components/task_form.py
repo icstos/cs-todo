@@ -21,6 +21,7 @@ def TaskForm(task, on_save, on_cancel):
     title, set_title = ft.use_state(task.title if task else "")
     priority, set_priority = ft.use_state(task.priority if task else "medium")
     category, set_category = ft.use_state(task.category if task else "work")
+    labels, set_labels = ft.use_state(task.labels if task else "")
     note, set_note = ft.use_state(task.note if task else "")
 
     def handle_save(_=None):
@@ -28,7 +29,7 @@ def TaskForm(task, on_save, on_cancel):
         if not trimmed:
             show_toast("请填写任务标题", icon=ft.Icons.INFO_OUTLINE)
             return
-        on_save(trimmed, priority, category, note.strip())
+        on_save(trimmed, priority, category, note.strip(), labels.strip())
 
     can_save = bool(title.strip())
 
@@ -84,6 +85,16 @@ def TaskForm(task, on_save, on_cancel):
                     ),
                 ],
                 spacing=6,
+            ),
+            ft.TextField(
+                label="标签（可选）",
+                value=labels,
+                hint_text="用逗号分隔，例如：紧急, 客户, 本周",
+                text_size=13,
+                border_radius=6,
+                border_color=BORDER_SUBTLE,
+                focused_border_color=ACCENT,
+                on_change=lambda e: set_labels(e.control.value),
             ),
             ft.TextField(
                 label="备注（可选）",

@@ -13,6 +13,7 @@ class Task(SQLModel, table=True):
     priority: str = Field(default="medium", index=True)   # high | medium | low
     category: str = Field(default="work", index=True)      # work | study | life
     status: str = Field(default="pending", index=True)    # pending | completed
+    labels: str = Field(default="", max_length=1000, index=True)
     note: str = Field(default="", max_length=2000)
     sort_order: int = Field(default=0, index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)

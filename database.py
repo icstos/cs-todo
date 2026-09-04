@@ -30,12 +30,19 @@ def _migrate_sort_order() -> None:
 
     with engine.connect() as conn:
         cols = [row[1] for row in conn.exec_driver_sql("PRAGMA table_info(tasks)")]
-        if "sort_order" in cols:
-            return
-        conn.exec_driver_sql(
-            "ALTER TABLE tasks ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0"
-        )
-        conn.commit()
+        altered = False
+        if "sort_order" not in cols:
+            conn.exec_driver_sql(
+                "ALTER TABLE tasks ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0"
+            )
+            altered = True
+        if "labels" not in cols:
+            conn.exec_driver_sql(
+                "ALTER TABLE tasks ADD COLUMN labels TEXT NOT NULL DEFAULT ''"
+            )
+            altered = True
+        if altered:
+            conn.commit()
 
     with session_scope() as s:
         rows = s.exec(select(Task).order_by(Task.created_at.desc())).all()

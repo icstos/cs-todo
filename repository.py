@@ -21,7 +21,13 @@ def get_task(task_id: int) -> Optional[Task]:
         return s.get(Task, task_id)
 
 
-def create_task(title: str, priority: str, category: str, note: str = "") -> Task:
+def create_task(
+    title: str,
+    priority: str,
+    category: str,
+    note: str = "",
+    labels: str = "",
+) -> Task:
     with session_scope() as s:
         min_order = s.exec(select(func.min(Task.sort_order))).one()
         sort_order = (min_order - 1) if min_order is not None else 0
@@ -30,6 +36,7 @@ def create_task(title: str, priority: str, category: str, note: str = "") -> Tas
             priority=priority,
             category=category,
             note=note.strip(),
+            labels=labels.strip(),
             sort_order=sort_order,
         )
         s.add(task)
