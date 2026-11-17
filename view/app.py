@@ -16,6 +16,7 @@ from view.design import PRIORITY_COLOR, TEXT_PRIMARY, TEXT_SECONDARY
 from view.filter_bar import FilterBar
 from view.formatting import format_today
 from view.hooks import use_notices, use_shortcuts, use_vm
+from view.progress import CompletionRing
 from view.search_bar import SearchBar
 from view.task_form import FormRegistry, TaskForm
 from view.task_item import TaskItem
@@ -224,7 +225,7 @@ def App(*, vm: TodoViewModel) -> ui.Control:
                                 alignment=ui.MainAxisAlignment.CENTER,
                             ),
                             ui.Container(expand=True),
-                            ui.RingProgress(
+                            CompletionRing(
                                 state.completed,
                                 total=state.total,
                                 tooltip=f"已完成 {state.completed} / {state.total} 项",
