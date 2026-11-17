@@ -5,51 +5,69 @@
 """
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import ui
 
-from theme import (
+from models.constants import CATEGORY_LABEL, PRIORITY_SHORT
+from models.enums import TaskStatus
+from models.task import Task
+from view.design import (
     CATEGORY_COLOR,
     CATEGORY_ICON,
-    CATEGORY_LABEL,
     PRIORITY_COLOR,
-    PRIORITY_SHORT,
     SUCCESS_TEXT,
     TEXT_MUTED,
     TEXT_PRIMARY,
     TEXT_SECONDARY,
 )
 
+__all__ = ["TaskItem"]
+
+type TaskHandler = Callable[[int], None]
+
 
 @ui.component
-def TaskItem(task, on_toggle, on_edit, on_delete) -> ui.Control:
+def TaskItem(
+    task: Task,
+    on_toggle: TaskHandler,
+    on_edit: TaskHandler,
+    on_delete: TaskHandler,
+) -> ui.Control:
     """单个任务行。"""
     hovered, set_hovered = ui.use_state(False)
 
-    is_completed = task.status == "completed"
+    is_completed = task.status == TaskStatus.COMPLETED.value
     priority_color = PRIORITY_COLOR[task.priority]
     category_color = CATEGORY_COLOR[task.category]
 
-    def handle_hover(e) -> None:
-        # e.data 是 "true"/"false" 字符串，比较前先归一。
-        value = str(getattr(e, "data", "")).lower() == "true"
+    def handle_hover(event: ui.HoverEvent) -> None:
+        # event.data 是 "true"/"false" 字符串，比较前先归一。
+        value = str(getattr(event, "data", "")).lower() == "true"
         if value != hovered:
             set_hovered(value)
 
-    labels = [
-        item.strip() for item in getattr(task, "labels", "").split(",") if item.strip()
-    ]
+    labels = [item.strip() for item in task.labels.split(",") if item.strip()]
 
     body = ui.Row(
         controls=[
             ui.ReorderableDragHandle(
-                content=ui.Icon(ui.Icons.DRAG_INDICATOR, size=ui.ICON_SIZE["lg"], color=TEXT_MUTED),
+                content=ui.Icon(
+                    ui.Icons.DRAG_INDICATOR,
+                    size=ui.ICON_SIZE["lg"],
+                    color=TEXT_MUTED,
+                ),
                 mouse_cursor=ui.MouseCursor.GRAB,
             ),
             ui.IconButton(
-                icon=ui.Icons.CHECK_CIRCLE if is_completed else ui.Icons.RADIO_BUTTON_UNCHECKED,
+                icon=(
+                    ui.Icons.CHECK_CIRCLE
+                    if is_completed
+                    else ui.Icons.RADIO_BUTTON_UNCHECKED
+                ),
                 icon_color=SUCCESS_TEXT if is_completed else TEXT_MUTED,
                 icon_size=ui.ICON_SIZE["xl"],
-                tooltip="标记完成" if not is_completed else "标记未完成",
+                tooltip="标记未完成" if is_completed else "标记完成",
                 on_click=lambda _: on_toggle(task.id),
                 style=ui.ButtonStyle(padding=ui.Padding.all(6)),
             ),
@@ -70,11 +88,13 @@ def TaskItem(task, on_toggle, on_edit, on_delete) -> ui.Control:
                                     size=ui.FONT_SIZE["body"],
                                     weight=ui.FontWeight.W_500,
                                     color=TEXT_MUTED if is_completed else TEXT_PRIMARY,
-                                    decoration=ui.TextDecoration.LINE_THROUGH
-                                    if is_completed
-                                    else None,
+                                    decoration=(
+                                        ui.TextDecoration.LINE_THROUGH
+                                        if is_completed
+                                        else None
+                                    ),
                                 ),
-                            ),
+                            )
                         ],
                         max_lines=1,
                         overflow=ui.TextOverflow.ELLIPSIS,
@@ -129,7 +149,9 @@ def TaskItem(task, on_toggle, on_edit, on_delete) -> ui.Control:
     return ui.GestureDetector(
         content=ui.Container(
             content=body,
-            padding=ui.Padding.symmetric(vertical=ui.SPACE["2"] + 2, horizontal=ui.SPACE["3"]),
+            padding=ui.Padding.symmetric(
+                vertical=ui.SPACE["2"] + 2, horizontal=ui.SPACE["3"]
+            ),
             border_radius=ui.RADIUS["lg"],
             bgcolor=ui.overlay(0.04) if hovered else ui.Colors.SURFACE,
             border=ui.Border.all(1, ui.Colors.OUTLINE_VARIANT),
@@ -152,7 +174,10 @@ def _badge(
     content: ui.Control
     if icon is not None:
         content = ui.Row(
-            controls=[ui.Icon(icon, size=ui.ICON_SIZE["xs"], color=color), ui.Text(text, size=11, color=color, weight=ui.FontWeight.W_500)],
+            controls=[
+                ui.Icon(icon, size=ui.ICON_SIZE["xs"], color=color),
+                ui.Text(text, size=11, color=color, weight=ui.FontWeight.W_500),
+            ],
             spacing=4,
             tight=True,
         )
@@ -167,7 +192,7 @@ def _badge(
     )
 
 
-def _action(icon: str, tooltip: str, on_click) -> ui.Control:
+def _action(icon: str, tooltip: str, on_click: Callable[[object], None]) -> ui.Control:
     """行末图标按钮：统一尺寸与留白，避免编辑/删除两枚大小不一。"""
     return ui.IconButton(
         icon=icon,
