@@ -1,7 +1,7 @@
 """筛选栏：分类、状态、专注模式与新建入口。
 
-筛选胶囊直接用 cs-ui 的 ``ChoiceChip``：显示文案与逻辑值分开（"高优先级" ↔
-``high``），选中态由外部状态决定，本组件不保存任何筛选条件。
+分类 / 状态用 :class:`ui.SegmentedButton` 做分段选择：显示文案与逻辑值分开
+（"工作" ↔ ``work``），选中态由外部状态决定，本组件不保存任何筛选条件。
 """
 from __future__ import annotations
 
@@ -12,38 +12,32 @@ import ui
 from models.constants import CATEGORY_LABEL, STATUS_LABEL
 from models.enums import Category, FilterStatus, Priority
 from view.design import (
-    CATEGORY_COLOR,
     CATEGORY_ICON,
     PRIORITY_COLOR,
     PRIORITY_FILL,
     PRIORITY_ON,
-    TEXT_SECONDARY,
 )
+from view.segments import ChoiceHandler, SegmentedChoice
 
 __all__ = ["FilterBar"]
 
-type ChoiceHandler = Callable[[str], None]
-
-# 分类胶囊的强调色：全部用中性色，其余三类取主题角色。
-_CATEGORIES: tuple[tuple[str, str, str | None, str], ...] = (
-    ("all", "全部", None, TEXT_SECONDARY),
+# 分类选项：逻辑值 → 展示文案 → 图标；"全部" 不带图标，避免抢走分类的注意力。
+_CATEGORIES: tuple[tuple[str, str, ui.IconData | None], ...] = (
+    ("all", "全部", None),
     (
         Category.WORK.value,
         CATEGORY_LABEL[Category.WORK.value],
         CATEGORY_ICON[Category.WORK.value],
-        CATEGORY_COLOR[Category.WORK.value],
     ),
     (
         Category.STUDY.value,
         CATEGORY_LABEL[Category.STUDY.value],
         CATEGORY_ICON[Category.STUDY.value],
-        CATEGORY_COLOR[Category.STUDY.value],
     ),
     (
         Category.LIFE.value,
         CATEGORY_LABEL[Category.LIFE.value],
         CATEGORY_ICON[Category.LIFE.value],
-        CATEGORY_COLOR[Category.LIFE.value],
     ),
 )
 _STATUSES: tuple[str, ...] = (
@@ -66,37 +60,18 @@ def FilterBar(
     """筛选栏组件：所有交互都只回调，不自己持有状态。"""
     return ui.Row(
         controls=[
-            ui.Row(
-                controls=[
-                    ui.ChoiceChip(
-                        label=label,
-                        value=value,
-                        selected=(category == value),
-                        disabled=focus_mode,
-                        on_click=on_category,
-                        icon=icon,
-                        color=color,
-                    )
-                    for value, label, icon, color in _CATEGORIES
-                ],
-                spacing=ui.SPACE["2"],
-                tight=True,
+            SegmentedChoice(
+                _CATEGORIES,
+                selected=category,
+                on_change=on_category,
+                disabled=focus_mode,
             ),
             ui.VerticalDivider(width=1, opacity=0.6),
-            ui.Row(
-                controls=[
-                    ui.ChoiceChip(
-                        label=STATUS_LABEL[value],
-                        value=value,
-                        selected=(status == value),
-                        disabled=focus_mode,
-                        on_click=on_status,
-                        color=ui.Colors.PRIMARY,
-                    )
-                    for value in _STATUSES
-                ],
-                spacing=ui.SPACE["2"],
-                tight=True,
+            SegmentedChoice(
+                tuple((value, STATUS_LABEL[value], None) for value in _STATUSES),
+                selected=status,
+                on_change=on_status,
+                disabled=focus_mode,
             ),
             ui.Container(expand=True),
             _focus_toggle(focus_mode, on_focus),

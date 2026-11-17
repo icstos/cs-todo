@@ -15,12 +15,8 @@ import ui
 from models.constants import CATEGORY_LABEL, PRIORITY_LABEL
 from models.enums import Category, Priority
 from models.task import Task
-from view.design import (
-    CATEGORY_COLOR,
-    CATEGORY_ICON,
-    PRIORITY_COLOR,
-    TEXT_SECONDARY,
-)
+from view.design import CATEGORY_ICON, TEXT_SECONDARY
+from view.segments import SegmentedChoice
 
 __all__ = ["FormRegistry", "TaskForm"]
 
@@ -77,34 +73,33 @@ def TaskForm(task: Task | None, form: FormRegistry) -> ui.Control:
             title.ui(),
             _choice_group(
                 "优先级",
-                [
-                    ui.ChoiceChip(
-                        PRIORITY_LABEL[value],
-                        value=value,
-                        selected=(priority == value),
-                        on_click=set_priority,
-                        color=PRIORITY_COLOR[value],
-                    )
-                    for value in (Priority.HIGH.value, Priority.MEDIUM.value, Priority.LOW.value)
-                ],
+                SegmentedChoice(
+                    tuple(
+                        (value, PRIORITY_LABEL[value], None)
+                        for value in (
+                            Priority.HIGH.value,
+                            Priority.MEDIUM.value,
+                            Priority.LOW.value,
+                        )
+                    ),
+                    selected=priority,
+                    on_change=set_priority,
+                ),
             ),
             _choice_group(
                 "分类",
-                [
-                    ui.ChoiceChip(
-                        CATEGORY_LABEL[value],
-                        value=value,
-                        selected=(category == value),
-                        on_click=set_category,
-                        color=CATEGORY_COLOR[value],
-                        icon=CATEGORY_ICON[value],
-                    )
-                    for value in (
-                        Category.WORK.value,
-                        Category.STUDY.value,
-                        Category.LIFE.value,
-                    )
-                ],
+                SegmentedChoice(
+                    tuple(
+                        (value, CATEGORY_LABEL[value], CATEGORY_ICON[value])
+                        for value in (
+                            Category.WORK.value,
+                            Category.STUDY.value,
+                            Category.LIFE.value,
+                        )
+                    ),
+                    selected=category,
+                    on_change=set_category,
+                ),
             ),
             labels.ui(),
             note.ui(),
@@ -114,8 +109,8 @@ def TaskForm(task: Task | None, form: FormRegistry) -> ui.Control:
     )
 
 
-def _choice_group(label: str, chips: list[ui.Control]) -> ui.Control:
-    """「标题 + 一排胶囊」的字段组，两组共用同一套间距与层级。"""
+def _choice_group(label: str, control: ui.Control) -> ui.Control:
+    """「标题 + 一排分段按钮」的字段组，两组共用同一套间距与层级。"""
     return ui.Column(
         controls=[
             ui.Text(
@@ -124,7 +119,7 @@ def _choice_group(label: str, chips: list[ui.Control]) -> ui.Control:
                 color=TEXT_SECONDARY,
                 weight=ui.FontWeight.W_500,
             ),
-            ui.Row(controls=chips, spacing=ui.SPACE["2"], tight=True),
+            control,
         ],
         spacing=ui.SPACE["2"],
         tight=True,
