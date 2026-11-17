@@ -1,5 +1,5 @@
 """数据访问层：封装任务 CRUD，保持业务逻辑与 UI 解耦。"""
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlmodel import func, select
@@ -53,7 +53,7 @@ def update_task(task_id: int, **fields) -> Optional[Task]:
         for key, value in fields.items():
             if hasattr(task, key) and value is not None:
                 setattr(task, key, value)
-        task.updated_at = datetime.utcnow()
+        task.updated_at = datetime.now(timezone.utc)
         s.add(task)
         s.commit()
         s.refresh(task)
@@ -67,7 +67,7 @@ def toggle_status(task_id: int) -> Optional[Task]:
         if task is None:
             return None
         task.status = "completed" if task.status == "pending" else "pending"
-        task.updated_at = datetime.utcnow()
+        task.updated_at = datetime.now(timezone.utc)
         s.add(task)
         s.refresh(task)
         return task
@@ -89,5 +89,5 @@ def reorder_tasks(ordered_ids: list[int]) -> None:
         rows = s.exec(select(Task).where(Task.id.in_(ordered_ids))).all()
         for task in rows:
             task.sort_order = id_to_order[task.id]
-            task.updated_at = datetime.utcnow()
+            task.updated_at = datetime.now(timezone.utc)
             s.add(task)

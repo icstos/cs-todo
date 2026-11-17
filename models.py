@@ -1,5 +1,5 @@
 """数据模型：基于 SQLModel 定义任务表结构。"""
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlmodel import SQLModel, Field
@@ -16,5 +16,8 @@ class Task(SQLModel, table=True):
     labels: str = Field(default="", max_length=1000, index=True)
     note: str = Field(default="", max_length=2000)
     sort_order: int = Field(default=0, index=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    # SQLAlchemy 2 要求带时区：naive 的 utcnow() 在 INSERT 时会被拒绝。
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), index=True
+    )
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

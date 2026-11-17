@@ -1,5 +1,5 @@
 # --- START: template .gitignore  ---
-
+.workbuddy
 # custom path
 output
 docs

@@ -1,10 +1,15 @@
-"""任务表单：新建/编辑对话框内容。"""
-import flet as ft
+"""任务表单：新建 / 编辑对话框的内容区。
 
-from components.chip import SelectChip
+表单值不放在 ``use_state`` 里逐字回写（那会让每次敲键都重渲染整棵控件树）：
+三个文本框用 cs-ui 的 ``Input`` 数据对象持有，选择项用两个 ``use_state`` 持有，
+渲染时把这些数据对象交给外层的 ``form`` 字典。保存按钮在对话框操作区，
+点击时读 ``form`` 即可拿到最新值 —— 值的唯一来源是数据对象，不是某个控件属性。
+"""
+from __future__ import annotations
+
+import ui
+
 from theme import (
-    ACCENT,
-    BORDER_SUBTLE,
     CATEGORY_COLOR,
     CATEGORY_ICON,
     CATEGORY_LABEL,
@@ -12,122 +17,99 @@ from theme import (
     PRIORITY_LABEL,
     TEXT_SECONDARY,
 )
-from utils.feedback import show_toast
 
 
-@ft.component
-def TaskForm(task, on_save, on_cancel):
-    """任务表单（通过 key 在打开时重置状态）。"""
-    title, set_title = ft.use_state(task.title if task else "")
-    priority, set_priority = ft.use_state(task.priority if task else "medium")
-    category, set_category = ft.use_state(task.category if task else "work")
-    labels, set_labels = ft.use_state(task.labels if task else "")
-    note, set_note = ft.use_state(task.note if task else "")
+@ui.component
+def TaskForm(task, form: dict) -> ui.Control:
+    """任务表单。调用方用 ``key`` 区分新建 / 编辑，从而重置内部输入状态。"""
+    title = ui.use_ref(
+        lambda: ui.Input(
+            label="任务标题",
+            value=task.title if task else "",
+            hint_text="例如：完成季度汇报草稿",
+            width=420,
+        )
+    ).current
+    labels = ui.use_ref(
+        lambda: ui.Input(
+            label="标签（可选）",
+            value=task.labels if task else "",
+            hint_text="用逗号分隔，例如：紧急, 客户, 本周",
+            width=420,
+        )
+    ).current
+    note = ui.use_ref(
+        lambda: ui.Input(
+            label="备注（可选）",
+            value=task.note if task else "",
+            hint_text="补充上下文、链接或验收标准…",
+            multiline=True,
+            width=420,
+        )
+    ).current
 
-    def handle_save(_=None):
-        trimmed = title.strip()
-        if not trimmed:
-            show_toast("请填写任务标题", icon=ft.Icons.INFO_OUTLINE)
-            return
-        on_save(trimmed, priority, category, note.strip(), labels.strip())
+    priority, set_priority = ui.use_state(task.priority if task else "medium")
+    category, set_category = ui.use_state(task.category if task else "work")
 
-    can_save = bool(title.strip())
+    # 每次渲染同步一次引用；事件回调里读 form 拿到的就是最新的数据对象。
+    form.update(
+        title=title,
+        labels=labels,
+        note=note,
+        priority=priority,
+        category=category,
+    )
 
-    return ft.Column(
+    return ui.Column(
         controls=[
-            ft.TextField(
-                label="任务标题",
-                value=title,
-                hint_text="例如：完成季度汇报草稿",
-                autofocus=True,
-                text_size=14,
-                border_radius=6,
-                border_color=BORDER_SUBTLE,
-                focused_border_color=ACCENT,
-                on_change=lambda e: set_title(e.control.value),
-                on_submit=handle_save,
-            ),
-            ft.Column(
-                controls=[
-                    ft.Text("优先级", size=12, color=TEXT_SECONDARY, weight=ft.FontWeight.W_500),
-                    ft.Row(
-                        controls=[
-                            SelectChip(
-                                label=PRIORITY_LABEL[p],
-                                active=(priority == p),
-                                on_click=lambda e, v=p: set_priority(v),
-                                color=PRIORITY_COLOR[p],
-                            )
-                            for p in ("high", "medium", "low")
-                        ],
-                        spacing=8,
-                        tight=True,
-                    ),
+            title.ui(),
+            _choice_group(
+                "优先级",
+                [
+                    ui.ChoiceChip(
+                        PRIORITY_LABEL[p],
+                        value=p,
+                        selected=(priority == p),
+                        on_click=set_priority,
+                        color=PRIORITY_COLOR[p],
+                    )
+                    for p in ("high", "medium", "low")
                 ],
-                spacing=6,
             ),
-            ft.Column(
-                controls=[
-                    ft.Text("分类", size=12, color=TEXT_SECONDARY, weight=ft.FontWeight.W_500),
-                    ft.Row(
-                        controls=[
-                            SelectChip(
-                                label=CATEGORY_LABEL[c],
-                                active=(category == c),
-                                on_click=lambda e, v=c: set_category(v),
-                                color=CATEGORY_COLOR[c],
-                                icon=CATEGORY_ICON[c],
-                            )
-                            for c in ("work", "study", "life")
-                        ],
-                        spacing=8,
-                        tight=True,
-                    ),
+            _choice_group(
+                "分类",
+                [
+                    ui.ChoiceChip(
+                        CATEGORY_LABEL[c],
+                        value=c,
+                        selected=(category == c),
+                        on_click=set_category,
+                        color=CATEGORY_COLOR[c],
+                        icon=CATEGORY_ICON[c],
+                    )
+                    for c in ("work", "study", "life")
                 ],
-                spacing=6,
             ),
-            ft.TextField(
-                label="标签（可选）",
-                value=labels,
-                hint_text="用逗号分隔，例如：紧急, 客户, 本周",
-                text_size=13,
-                border_radius=6,
-                border_color=BORDER_SUBTLE,
-                focused_border_color=ACCENT,
-                on_change=lambda e: set_labels(e.control.value),
-            ),
-            ft.TextField(
-                label="备注（可选）",
-                value=note,
-                hint_text="补充上下文、链接或验收标准…",
-                multiline=True,
-                min_lines=2,
-                max_lines=4,
-                text_size=13,
-                border_radius=6,
-                border_color=BORDER_SUBTLE,
-                focused_border_color=ACCENT,
-                on_change=lambda e: set_note(e.control.value),
-            ),
-            ft.Row(
-                controls=[
-                    ft.TextButton("取消", on_click=lambda _: on_cancel()),
-                    ft.Button(
-                        content=ft.Text("保存", size=13, weight=ft.FontWeight.W_500),
-                        icon=ft.Icons.CHECK,
-                        on_click=handle_save,
-                        disabled=not can_save,
-                        style=ft.ButtonStyle(
-                            bgcolor=ACCENT,
-                            color=ft.Colors.WHITE,
-                            shape=ft.RoundedRectangleBorder(radius=6),
-                        ),
-                    ),
-                ],
-                alignment=ft.MainAxisAlignment.END,
-                spacing=8,
-            ),
+            labels.ui(),
+            note.ui(),
         ],
-        spacing=14,
+        spacing=ui.SPACE["4"],
+        tight=True,
+    )
+
+
+def _choice_group(label: str, chips: list[ui.Control]) -> ui.Control:
+    """「标题 + 一排胶囊」的字段组，两组共用同一套间距与层级。"""
+    return ui.Column(
+        controls=[
+            ui.Text(
+                label,
+                size=ui.FONT_SIZE["small"],
+                color=TEXT_SECONDARY,
+                weight=ui.FontWeight.W_500,
+            ),
+            ui.Row(controls=chips, spacing=ui.SPACE["2"], tight=True),
+        ],
+        spacing=ui.SPACE["2"],
         tight=True,
     )

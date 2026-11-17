@@ -1,47 +1,47 @@
-"""应用入口：窗口配置、主题、挂载根组件。"""
-import flet as ft
+"""应用入口：窗口与主题配置，然后挂载根组件。
+
+页面级配置只在这里做，组件不碰 ``page`` 的样式属性。主题遵循 cs-ui 的唯一出口：
+品牌色经色板引擎展开成 46 个 M3 角色，明暗两棵树一次下发 —— 应用侧不再出现
+``color_scheme_seed``（tonalSpot 会把品牌蓝抽掉一半彩度）。
+"""
+from __future__ import annotations
+
+import ui
 
 from components.app import App
 from database import init_db
-from theme import ACCENT, BG_APP, BORDER_SUBTLE
+from theme import BRAND_PRIMARY
 
 
-async def main(page: ft.Page):
-    init_db()
-
+def configure_page(page: ui.Page) -> None:
+    """一次性配好标题、主题与窗口。"""
     page.title = "cs-todo · 高效任务管理"
-    page.bgcolor = BG_APP
     page.padding = 0
 
-    # 窗口配置（仅桌面端生效，web 端忽略）
+    theme = ui.theme_state()
+    theme.set_mode("light")          # 本产品的设计稿按浅色定义
+    theme.set_primary(BRAND_PRIMARY)
+    ui.apply_theme(page, theme)      # 同时写 theme / dark_theme / bgcolor
+
     try:
-        page.window.width = 1024
-        page.window.height = 720
-        page.window.min_width = 820
-        page.window.min_height = 560
+        window = page.window
+        window.width = 1024
+        window.height = 720
+        window.min_width = 820
+        window.min_height = 560
+    except Exception:
+        pass  # web 端没有 window
+
+
+async def main(page: ui.Page) -> None:
+    init_db()
+    configure_page(page)
+    page.render(App)
+    try:
         await page.window.center()
     except Exception:
         pass
 
-    # 主题：克制、理性、严谨
-    page.theme = ft.Theme(
-        color_scheme_seed=ACCENT,
-        color_scheme=ft.ColorScheme(
-            primary=ACCENT,
-            on_primary=ft.Colors.WHITE,
-            surface="#FFFFFF",
-            on_surface="#18181B",
-            on_surface_variant="#71717A",
-            outline=BORDER_SUBTLE,
-            outline_variant="#F4F4F5",
-        ),
-        font_family="Segoe UI",
-        visual_density=ft.VisualDensity.COMFORTABLE,
-    )
-    page.theme_mode = ft.ThemeMode.LIGHT
-
-    page.render(App)
-
 
 if __name__ == "__main__":
-    ft.run(main)
+    ui.run(main, name="cs-todo")
