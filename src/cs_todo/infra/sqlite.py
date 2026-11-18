@@ -12,15 +12,16 @@ from typing import Iterator
 
 from sqlmodel import Session, SQLModel, create_engine, func, select
 
-from infra.ports import TaskRepository
-from models.enums import TaskStatus
-from models.state import TaskChanges, TaskDraft
-from models.task import Task
+from cs_todo._paths import database_path
+from cs_todo.infra.ports import TaskRepository
+from cs_todo.models.enums import TaskStatus
+from cs_todo.models.state import TaskChanges, TaskDraft
+from cs_todo.models.task import Task
 
 __all__ = ["DB_PATH", "SqliteTaskRepository"]
 
-#: 与迁移前相同：项目根目录下的 cs_todo.db。
-DB_PATH: Path = Path(__file__).resolve().parent.parent / "cs_todo.db"
+#: 与迁移前相同：项目根目录下的 cs_todo.db；路径由 _paths 统一出口解析。
+DB_PATH: Path = database_path()
 
 _engine = create_engine(
     f"sqlite:///{DB_PATH}",

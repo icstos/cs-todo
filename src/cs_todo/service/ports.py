@@ -8,8 +8,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
-from models.state import TaskChanges, TaskDraft
-from models.task import Task
+from cs_todo.models.state import TaskChanges, TaskDraft
+from cs_todo.models.task import Task
 
 __all__ = ["TaskService"]
 

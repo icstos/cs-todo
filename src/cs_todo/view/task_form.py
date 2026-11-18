@@ -12,11 +12,11 @@ from __future__ import annotations
 
 import ui
 
-from models.constants import CATEGORY_LABEL, PRIORITY_LABEL
-from models.enums import Category, Priority
-from models.task import Task
-from view.design import CATEGORY_ICON, TEXT_SECONDARY
-from view.segments import SegmentedChoice
+from cs_todo.models.constants import CATEGORY_LABEL, PRIORITY_LABEL
+from cs_todo.models.enums import Category, Priority
+from cs_todo.models.task import Task
+from cs_todo.view.design import CATEGORY_ICON, TEXT_SECONDARY
+from cs_todo.view.segments import SegmentedChoice
 
 __all__ = ["FormRegistry", "TaskForm"]
 

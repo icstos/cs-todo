@@ -10,13 +10,13 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from models.enums import TaskStatus, ToastTone
-from models.errors import InvalidTaskError
-from models.events import Shortcut
-from models.state import AppState, TaskChanges, TaskDraft, ViewState
-from models.task import Task
-from service.ports import TaskService
-from viewmodel.base import ViewModel
+from cs_todo.models.enums import TaskStatus, ToastTone
+from cs_todo.models.errors import InvalidTaskError
+from cs_todo.models.events import Shortcut
+from cs_todo.models.state import AppState, TaskChanges, TaskDraft, ViewState
+from cs_todo.models.task import Task
+from cs_todo.service.ports import TaskService
+from cs_todo.viewmodel.base import ViewModel
 
 __all__ = ["TodoViewModelImpl"]
 

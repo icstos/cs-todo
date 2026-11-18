@@ -10,17 +10,17 @@ from collections.abc import Callable
 
 import ui
 
-from models.enums import Category, Priority
-from models.state import TaskDraft, ViewState
-from view.design import PRIORITY_COLOR, TEXT_PRIMARY, TEXT_SECONDARY
-from view.filter_bar import FilterBar
-from view.formatting import format_today
-from view.hooks import use_notices, use_shortcuts, use_vm
-from view.progress import CompletionRing
-from view.search_bar import SearchBar
-from view.task_form import FormRegistry, TaskForm
-from view.task_item import TaskItem
-from viewmodel.ports import TodoViewModel
+from cs_todo.models.enums import Category, Priority
+from cs_todo.models.state import TaskDraft, ViewState
+from cs_todo.view.design import PRIORITY_COLOR, TEXT_PRIMARY, TEXT_SECONDARY
+from cs_todo.view.filter_bar import FilterBar
+from cs_todo.view.formatting import format_today
+from cs_todo.view.hooks import use_notices, use_shortcuts, use_vm
+from cs_todo.view.progress import CompletionRing
+from cs_todo.view.search_bar import SearchBar
+from cs_todo.view.task_form import FormRegistry, TaskForm
+from cs_todo.view.task_item import TaskItem
+from cs_todo.viewmodel.ports import TodoViewModel
 
 __all__ = ["App"]
 

@@ -14,7 +14,8 @@
   ``ui``，不直接 import flet；
 * 禁止用动态 import 绕过检查；所有函数都必须有完整类型注解。
 
-组合根 ``main.py`` 是唯一允许认识所有具体实现的地方，不参与分层约束（但参与注解检查）。
+源码位于 ``src/cs_todo/<layer>/``：层内模块以 ``cs_todo.`` 开头，包名 ``cs_todo``
+本身不被当成第三方依赖；组合根 ``main.py`` 只做 sys.path 引导与启动。
 
 用法::
 
@@ -29,15 +30,18 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+PROJECT = "cs_todo"
+PROJECT_ROOT = ROOT / "src" / PROJECT
 LAYERS: tuple[str, ...] = ("models", "infra", "service", "viewmodel", "view")
 
 #: 每层允许引用的包内前缀（含同层互引）。端口例外是"高层依赖抽象"的硬边界。
+#: ``_paths`` 是无业务逻辑的项目级路径出口，所有层都可引用（与 models 同类）。
 ALLOWED_PREFIXES: dict[str, tuple[str, ...]] = {
-    "models": ("models",),
-    "infra": ("models", "infra"),
-    "service": ("models", "service", "infra.ports"),
-    "viewmodel": ("models", "viewmodel", "service.ports"),
-    "view": ("models", "view", "viewmodel.ports"),
+    "models": ("models", "_paths"),
+    "infra": ("models", "infra", "_paths"),
+    "service": ("models", "service", "infra.ports", "_paths"),
+    "viewmodel": ("models", "viewmodel", "service.ports", "_paths"),
+    "view": ("models", "view", "viewmodel.ports", "_paths"),
 }
 
 #: 每层允许的第三方顶层包；标准库不限。
@@ -54,14 +58,21 @@ DYNAMIC_IMPORT_NAMES = frozenset({"__import__", "import_module"})
 
 
 def layer_of(path: Path) -> str | None:
-    """相对项目根的路径 → 层名；不在任何层里返回 ``None``。"""
-    parts = path.relative_to(ROOT).parts
+    """相对 ``src/cs_todo`` 的路径 → 层名；不在任何层里返回 ``None``。"""
+    try:
+        parts = path.relative_to(PROJECT_ROOT).parts
+    except ValueError:
+        return None
     return parts[0] if parts and parts[0] in LAYERS else None
 
 
 def module_name(path: Path) -> str:
-    """文件路径 → 点分模块名（相对于项目根）。"""
-    return ".".join(path.relative_to(ROOT).with_suffix("").parts)
+    """文件路径 → 点分模块名；包外文件（如根 main.py）返回文件名。"""
+    try:
+        rel = path.relative_to(PROJECT_ROOT).with_suffix("").parts
+    except ValueError:
+        return path.stem
+    return ".".join((PROJECT, *rel))
 
 
 def resolve_from(node: ast.ImportFrom, package_parts: list[str]) -> str | None:
@@ -90,7 +101,7 @@ def analyse(path: Path) -> tuple[set[str], set[str], list[str], list[str]]:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 root = alias.name.split(".")[0]
-                if root in LAYERS:
+                if root == PROJECT or root in LAYERS:
                     internal.add(alias.name)
                 elif root not in STDLIB:
                     third_party.add(root)
@@ -99,7 +110,7 @@ def analyse(path: Path) -> tuple[set[str], set[str], list[str], list[str]]:
             if resolved is None:
                 continue
             root = resolved.split(".")[0]
-            if root in LAYERS:
+            if root == PROJECT or root in LAYERS:
                 internal.add(resolved)
             elif root not in STDLIB:
                 third_party.add(root)
@@ -162,8 +173,9 @@ def check() -> list[str]:
             rel = path.relative_to(ROOT).as_posix()
 
             for target in sorted(internal):
+                normalized = target.removeprefix(f"{PROJECT}.")
                 if not any(
-                    target == prefix or target.startswith(f"{prefix}.")
+                    normalized == prefix or normalized.startswith(f"{prefix}.")
                     for prefix in allowed
                 ):
                     problems.append(

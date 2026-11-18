@@ -9,15 +9,15 @@ from collections.abc import Callable
 
 import ui
 
-from models.constants import CATEGORY_LABEL, STATUS_LABEL
-from models.enums import Category, FilterStatus, Priority
-from view.design import (
+from cs_todo.models.constants import CATEGORY_LABEL, STATUS_LABEL
+from cs_todo.models.enums import Category, FilterStatus, Priority
+from cs_todo.view.design import (
     CATEGORY_ICON,
     PRIORITY_COLOR,
     PRIORITY_FILL,
     PRIORITY_ON,
 )
-from view.segments import ChoiceHandler, SegmentedChoice
+from cs_todo.view.segments import ChoiceHandler, SegmentedChoice
 
 __all__ = ["FilterBar"]
 

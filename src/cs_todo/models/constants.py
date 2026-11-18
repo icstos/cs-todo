@@ -8,7 +8,7 @@
 """
 from __future__ import annotations
 
-from models.enums import Category, FilterStatus, Priority, TaskStatus
+from cs_todo.models.enums import Category, FilterStatus, Priority, TaskStatus
 
 __all__ = [
     "CATEGORY_LABEL",

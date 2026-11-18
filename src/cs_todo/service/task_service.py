@@ -8,13 +8,13 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from infra.ports import TaskRepository
-from models.constants import CATEGORY_LABEL, PRIORITY_LABEL, PRIORITY_SHORT
-from models.enums import Category, FilterStatus, Priority, TaskStatus
-from models.errors import InvalidTaskError
-from models.state import TaskChanges, TaskDraft
-from models.task import Task
-from service.ports import TaskService
+from cs_todo.infra.ports import TaskRepository
+from cs_todo.models.constants import CATEGORY_LABEL, PRIORITY_LABEL, PRIORITY_SHORT
+from cs_todo.models.enums import Category, FilterStatus, Priority, TaskStatus
+from cs_todo.models.errors import InvalidTaskError
+from cs_todo.models.state import TaskChanges, TaskDraft
+from cs_todo.models.task import Task
+from cs_todo.service.ports import TaskService
 
 __all__ = ["TaskServiceImpl"]
 

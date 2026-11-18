@@ -8,8 +8,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Protocol, runtime_checkable
 
-from models.events import Notice, Shortcut
-from models.state import AppState, TaskDraft, ViewState
+from cs_todo.models.events import Notice, Shortcut
+from cs_todo.models.state import AppState, TaskDraft, ViewState
 
 __all__ = ["TodoViewModel"]
 

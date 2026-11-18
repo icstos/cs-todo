@@ -4,6 +4,6 @@
 """
 from __future__ import annotations
 
-from service.ports import TaskService
+from cs_todo.service.ports import TaskService
 
 __all__ = ["TaskService"]

@@ -10,7 +10,7 @@ from typing import Optional
 
 from sqlmodel import Field, SQLModel
 
-from models.enums import Category, Priority, TaskStatus
+from cs_todo.models.enums import Category, Priority, TaskStatus
 
 __all__ = ["Task"]
 

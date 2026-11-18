@@ -17,8 +17,8 @@ from collections.abc import Callable
 from dataclasses import replace
 from typing import Any, cast
 
-from models.enums import ToastTone
-from models.events import Notice
+from cs_todo.models.enums import ToastTone
+from cs_todo.models.events import Notice
 
 __all__ = ["ViewModel"]
 

@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import ui
 
-from models.constants import CATEGORY_LABEL, PRIORITY_SHORT, STATUS_LABEL
-from models.enums import Category, Priority
+from cs_todo.models.constants import CATEGORY_LABEL, PRIORITY_SHORT, STATUS_LABEL
+from cs_todo.models.enums import Category, Priority
 
 __all__ = [
     "BORDER_SUBTLE",

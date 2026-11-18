@@ -1,0 +1,23 @@
+[project]
+name = "cs-todo"
+version = "1.0.0"
+description = "基于 cs-ui 的桌面任务管理应用"
+requires-python = ">=3.12"
+dependencies = [
+    # cs-ui 由本地环境提供（import ui），不在此声明，避免装到 PyPI 上的同名包。
+    "sqlmodel>=0.0.21",
+]
+
+[project.scripts]
+cs-todo = "cs_todo.bootstrap:run"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+# src 布局关键配置：setuptools 从 src 下发现顶层包 cs_todo 及其全部子包。
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

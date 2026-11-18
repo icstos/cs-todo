@@ -14,9 +14,9 @@ from collections.abc import Callable
 
 import ui
 
-from models.events import Shortcut
-from view.feedback import show_toast
-from viewmodel.ports import TodoViewModel
+from cs_todo.models.events import Shortcut
+from cs_todo.view.feedback import show_toast
+from cs_todo.viewmodel.ports import TodoViewModel
 
 __all__ = ["use_notices", "use_shortcuts", "use_vm"]
 

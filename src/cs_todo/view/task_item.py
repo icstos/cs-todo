@@ -9,10 +9,10 @@ from collections.abc import Callable
 
 import ui
 
-from models.constants import CATEGORY_LABEL, PRIORITY_SHORT
-from models.enums import TaskStatus
-from models.task import Task
-from view.design import (
+from cs_todo.models.constants import CATEGORY_LABEL, PRIORITY_SHORT
+from cs_todo.models.enums import TaskStatus
+from cs_todo.models.task import Task
+from cs_todo.view.design import (
     CATEGORY_COLOR,
     CATEGORY_ICON,
     PRIORITY_COLOR,

@@ -12,8 +12,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TypedDict
 
-from models.enums import Category, Priority
-from models.task import Task
+from cs_todo.models.enums import Category, Priority
+from cs_todo.models.task import Task
 
 __all__ = ["AppState", "TaskChanges", "TaskDraft", "ViewState"]
 
